@@ -19,7 +19,7 @@ import android.graphics.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import com.google.ar.core.codelabs.arlocalizer.LocalizeActivity
+import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.R
 
 class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {

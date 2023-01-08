@@ -28,14 +28,14 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Earth
 import com.google.ar.core.GeospatialPose
-import com.google.ar.core.codelabs.arlocalizer.LocalizeActivity
+import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.R
 import com.google.ar.core.examples.java.common.helpers.SnackbarHelper
 
 
 /** Contains UI elements for Hello Geo. */
 class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
-    val root = View.inflate(activity, R.layout.activity_main, null)
+    val root = View.inflate(activity, R.layout.activity_localize, null)
     val surfaceView = root.findViewById<GLSurfaceView>(R.id.surfaceview)
     val distanceView = root.findViewById<TextView>(R.id.distance)
     val distanceRl = root.findViewById<RelativeLayout>(R.id.distanceRl)

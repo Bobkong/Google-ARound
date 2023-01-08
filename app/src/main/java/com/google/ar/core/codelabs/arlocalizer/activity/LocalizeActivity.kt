@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.ar.core.codelabs.arlocalizer
+package com.google.ar.core.codelabs.arlocalizer.activity
 
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import com.google.ar.core.codelabs.arlocalizer.LocalizeRenderer
 import com.google.ar.core.codelabs.arlocalizer.helpers.ARCoreSessionLifecycleHelper
 import com.google.ar.core.codelabs.arlocalizer.helpers.GeoPermissionsHelper
 import com.google.ar.core.codelabs.arlocalizer.helpers.LocalizeView

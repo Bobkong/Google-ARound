@@ -22,6 +22,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
+import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
 import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper
 import com.google.ar.core.examples.java.common.samplerender.*

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_bg</item>
+    </style>
+
+    <style name = "NoActionBar" parent = "@style/AppTheme">
+        <item name = "android:windowActionBar">false</item>
+        <item name = "android:windowNoTitle">true</item>
+    </style>
+
     <declare-styleable name="RadiusCardView">
         <!--        左上圆角大小-->
         <attr name="rcv_topLeftRadiu" format="dimension" />
