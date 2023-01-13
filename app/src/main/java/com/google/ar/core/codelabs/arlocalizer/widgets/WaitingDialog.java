@@ -26,7 +26,7 @@ public class WaitingDialog {
                 return waitingDialog;
             }
 
-            waitingDialog = new Dialog(context, R.style.Widget_Sendbird_SendbirdProgressDialog);
+            waitingDialog = new Dialog(context, R.style.ProgressDialog);
             return waitingDialog;
         }
     }

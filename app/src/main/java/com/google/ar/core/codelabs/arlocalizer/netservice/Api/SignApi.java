@@ -13,8 +13,8 @@ import retrofit2.http.Query;
 
 public interface SignApi {
     //sign up
-    @POST("/users/signup")
-    Observable<GeneralResponse> signUp(
+    @POST("/users/signout")
+    Observable<GeneralResponse> signOut(
             @Body User params
             );
 

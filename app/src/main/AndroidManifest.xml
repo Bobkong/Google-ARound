@@ -36,6 +36,7 @@
       android:roundIcon="@mipmap/ic_launcher"
       android:theme="@style/AppTheme"
       android:supportsRtl="true"
+      android:resizeableActivity="false"
       android:usesCleartextTraffic="true"
       tools:replace="android:allowBackup"
       tools:ignore="GoogleAppIndexingWarning"
@@ -61,15 +62,15 @@
 
     <activity
         android:name=".activity.MainActivity"
-        android:theme="@style/NoActionBar"/>
+        android:launchMode="singleTask"/>
     <!-- Indicates whether "Google Play Services for AR" (ARCore) is "required" or "optional". -->
     <meta-data android:name="com.google.ar.core" android:value="required" />
 
-    <activity android:name=".activity.SignUpActivity"
-        android:theme="@style/NoActionBar"/>
-    <activity android:name=".activity.LoginActivity"
+      <activity android:name=".activity.LoginActivity"
         android:theme="@style/NoActionBar"/>
 
+    <activity android:name=".activity.ChatActivity"
+        android:theme="@style/NoActionBar"/>
     <meta-data
         android:name="com.google.android.ar.API_KEY"
         android:value="AIzaSyBHWMoxz8l5prXUSRnjRCIBGh_veejxFNM"/>

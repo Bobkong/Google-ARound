@@ -90,7 +90,7 @@ class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
     isSelf: Boolean
   ): Marker {
     val markersOptions = MarkerOptions()
-      .position(LatLng(32.87531481820564,-117.22207725048065))
+      .position(LatLng(0.0,0.0))
       .draggable(false)
       .anchor(0.5f, 0.5f)
       .flat(true)

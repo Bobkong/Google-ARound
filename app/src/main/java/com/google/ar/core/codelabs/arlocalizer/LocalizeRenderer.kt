@@ -140,6 +140,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
   }
   //</editor-fold>
 
+  var hasPlacedAnchor = false
   override fun onDrawFrame(render: SampleRender) {
     val session = session ?: return
 
@@ -214,6 +215,13 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
         longitude = cameraGeospatialPose.longitude,
         heading = cameraGeospatialPose.heading
       )
+
+      if (!hasPlacedAnchor) {
+        activity.runOnUiThread {
+          placeAnchor()
+        }
+        hasPlacedAnchor = true
+      }
     }
 
     hostAnchor()
@@ -283,7 +291,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
   var destinationAnchor: Anchor? = null
   var destinationCoordinate: GeoCoordinate? = null
 
-  fun onMapClick(latLng: LatLng) {
+  private fun placeAnchor() {
     val earth = session?.earth ?: return
     if (earth.trackingState != TrackingState.TRACKING) {
       return
@@ -291,18 +299,20 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
 
     destinationAnchor?.detach()
     // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
-    val altitude = earth.cameraGeospatialPose.altitude - 1
     // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
     val qx = 0f
     val qy = 0f
     val qz = 0f
-    val qw = 0f
+    val qw = 1f
+    val currentCoordinate = GeoCoordinate(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude, earth.cameraGeospatialPose.altitude - 1)
+    destinationCoordinate = Mercator.calculateDerivedPosition(currentCoordinate, 20.0, earth.cameraGeospatialPose.heading)
+
     destinationAnchor =
-      earth.createAnchor(32.87531481820564, -117.22207725048065, altitude, qx, qy, qz, qw)
-    destinationCoordinate = GeoCoordinate(32.87531481820564, -117.22207725048065, altitude)
+      earth.createAnchor(destinationCoordinate!!.latitude, destinationCoordinate!!.longitude, destinationCoordinate!!.altitude, qx, qy, qz, qw)
 
 
     activity.view.mapView?.earthMarker?.apply {
+      position = LatLng(destinationCoordinate!!.latitude, destinationCoordinate!!.longitude)
       isVisible = true
     }
   }
@@ -324,6 +334,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     navigationAnchor?.detach()
 
     navigationHeading = activity.view.mapView?.courseAngle()
+
     if (navigationHeading == null) {
       return
     }

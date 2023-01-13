@@ -28,10 +28,24 @@
   </style>
 
   <!-- Application theme. -->
-  <style name="AppTheme" parent="AppBaseTheme">
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    <item name="colorPrimary">@color/theme_color</item>
   </style>
 
+
+  <style name="ProgressDialog">
+    <item name="android:windowFrame">@null</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowTitleStyle">@null</item>
+    <item name="android:windowAnimationStyle">@null</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+  </style>
+
+  <declare-styleable name="RoundRectImageView">
+    <attr name="radius" format="dimension"/>
+  </declare-styleable>
 
 
 </resources>

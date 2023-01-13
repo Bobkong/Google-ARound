@@ -51,9 +51,9 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
     var mapView: MapView? = null
     val mapTouchWrapper = root.findViewById<MapTouchWrapper>(R.id.map_wrapper).apply {
         setup { screenLocation ->
-            val latLng: LatLng =
-                mapView?.googleMap?.projection?.fromScreenLocation(screenLocation) ?: return@setup
-            activity.renderer.onMapClick(latLng)
+//            val latLng: LatLng =
+//                mapView?.googleMap?.projection?.fromScreenLocation(screenLocation) ?: return@setup
+//            activity.renderer.onMapClick(latLng)
         }
     }
     val mapFragment =

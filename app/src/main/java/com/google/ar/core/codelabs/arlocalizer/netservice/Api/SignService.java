@@ -20,8 +20,8 @@ public class SignService {
 
     private final SignApi signApi= ARoundServiceManager.getInstance().create(SignApi.class);
 
-    public Observable<GeneralResponse> signUp(String username, String password){
-        return signApi.signUp(new User(username, password))
+    public Observable<GeneralResponse> signOut(String username){
+        return signApi.signOut(new User(username, ""))
                 .onErrorResumeNext(new HttpResultFunc<>())
                 .subscribeOn(Schedulers.io());
     }

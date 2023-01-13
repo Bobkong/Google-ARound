@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ProgressBar
 import com.google.ar.core.codelabs.arlocalizer.R
-import com.sendbird.uikit.utils.DrawableUtils
+import com.google.ar.core.codelabs.arlocalizer.utils.DrawableUtils
 
 internal class ProgressView @JvmOverloads constructor(
     context: Context,
