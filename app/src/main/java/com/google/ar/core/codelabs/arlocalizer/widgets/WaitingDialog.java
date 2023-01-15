@@ -1,11 +1,14 @@
 package com.google.ar.core.codelabs.arlocalizer.widgets;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +30,8 @@ public class WaitingDialog {
             }
 
             waitingDialog = new Dialog(context, R.style.ProgressDialog);
+
+
             return waitingDialog;
         }
     }
@@ -46,6 +51,8 @@ public class WaitingDialog {
     public static void show(@NonNull Context context, final boolean cancelable, final int layoutResId, @Nullable DialogInterface.OnCancelListener listener) {
         dismiss();
 
+
+
         mainHandler.post(() -> {
             Log.d(TAG, ">> WaitingDialog::show()");
             waitingDialog = getWaitingDialog(context);
@@ -60,6 +67,13 @@ public class WaitingDialog {
                 waitingDialog.setOnCancelListener(listener);
             }
             waitingDialog.show();
+
+            Window window = ((Activity)context).getWindow();
+            WindowManager.LayoutParams layoutParams = window.getAttributes();
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            window.setAttributes(layoutParams);
+            window.setDimAmount(0f);
+            waitingDialog.setCanceledOnTouchOutside(false);
         });
     }
 

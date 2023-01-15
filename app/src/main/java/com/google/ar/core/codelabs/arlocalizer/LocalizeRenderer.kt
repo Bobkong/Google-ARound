@@ -23,13 +23,19 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
 import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
+import com.google.ar.core.codelabs.arlocalizer.model.CloudAnchor
+import com.google.ar.core.codelabs.arlocalizer.netservice.Api.SignService
+import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
+import com.google.ar.core.codelabs.arlocalizer.widgets.WaitingDialog
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
 import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper
 import com.google.ar.core.examples.java.common.samplerender.*
 import com.google.ar.core.examples.java.common.samplerender.arcore.BackgroundRenderer
 import com.google.ar.core.exceptions.CameraNotAvailableException
-import com.google.common.base.Preconditions
+import io.reactivex.android.schedulers.AndroidSchedulers
 import java.io.IOException
+import java.util.*
+import kotlin.math.abs
 
 
 class LocalizeRenderer(val activity: LocalizeActivity) :
@@ -73,8 +79,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
 
   var currentAnchor: Anchor? = null
   private val anchorLock = Any()
-  private var hostedAnchor = false
-  var cloudAnchorId: String? = null
+  private var hasStartedWaiting = false
 
   override fun onResume(owner: LifecycleOwner) {
     displayRotationHelper.onResume()
@@ -96,12 +101,12 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
       virtualObjectTexture =
         Texture.createFromAsset(
           render,
-          "models/spatial_marker_baked.png",
+          "models/dest_texture.png",
           Texture.WrapMode.CLAMP_TO_EDGE,
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj")
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker_1.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,
@@ -140,7 +145,6 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
   }
   //</editor-fold>
 
-  var hasPlacedAnchor = false
   override fun onDrawFrame(render: SampleRender) {
     val session = session ?: return
 
@@ -216,105 +220,123 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
         heading = cameraGeospatialPose.heading
       )
 
-      if (!hasPlacedAnchor) {
-        activity.runOnUiThread {
-          placeAnchor()
-        }
-        hasPlacedAnchor = true
-      }
     }
 
-    hostAnchor()
+    updateNavigation()
 
     // Draw the placed anchor, if it exists.
     destinationAnchor?.let {
       render.renderCompassAtAnchor(it)
     }
 
-    navigationAnchor?.let {
-      render.renderNavigationAtAnchor(it)
-    }
+
+//    navigationAnchor?.let {
+//      if (distance != null && distance!! > 5) {
+//        render.renderNavigationAtAnchor(it)
+//      }
+//    }
 
     activity.runOnUiThread {
       startNavigation()
+    }
+
+    navigationHeading?.let {
+      if (distance != null && distance!! < 8) {
+        // reaching the destination, don't show animation
+        activity.view.stopNavigateAnim()
+        activity.view.stopMovePhoneAnim()
+        // show success slogan
+        if (PreferenceUtils.getNickname() == "Liz") {
+          activity.view.setInstruction("Congratulations! You find Ryan!")
+        } else {
+          activity.view.setInstruction("Congratulations! You find Liz!")
+        }
+      } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 20) {
+      activity.view.startNavigateAnim()
+    } else {
+      activity.view.startMovePhoneAnim()
+    }
+
     }
 
     // Compose the virtual scene with the backgroundwo.
     backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR)
   }
 
-  private fun hostAnchor() {
+  var timer = Timer()
+  // wait friend to join
+  private fun updateNavigation() {
+
     val earth = session?.earth
 
-    if (earth == null || earth.trackingState != TrackingState.TRACKING || hostedAnchor) {
+    if (earth == null || earth.trackingState != TrackingState.TRACKING || hasStartedWaiting) {
       return
     }
 
-    if (currentAnchor == null) {
-      currentAnchor =
-        earth?.createAnchor(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude,
-          earth.cameraGeospatialPose.altitude, 0f, 0f, 0f, 1f)
+    hasStartedWaiting = true
+    val username = PreferenceUtils.getNickname()
+    if (username == "Liz") {
+      activity.view.setInstruction("Waiting for Ryan to join...")
+    } else {
+      activity.view.setInstruction("Waiting for Liz to join...")
     }
 
-    synchronized(anchorLock) {
-      hostedAnchor = true
-      cloudAnchorManager?.hostCloudAnchor(
-        currentAnchor, CloudAnchorManager.CloudAnchorListener {
-          activity.runOnUiThread {
-            val state = it.cloudAnchorState
-            if (state.isError) {
-              Log.e(TAG, "Error hosting a cloud anchor, state $state")
-              hostedAnchor = false
-            } else {
-              Preconditions.checkState(cloudAnchorId == null, "The cloud anchor ID cannot have been set before.")
-              cloudAnchorId = it.cloudAnchorId
-              setNewAnchor(it)
-              // todo upload the cloudAnchorId and userId to server
+    val task = object : TimerTask() {
+      override fun run() {
+
+        SignService.getInstance().navigate(username, earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude,
+        earth.cameraGeospatialPose.altitude).observeOn(AndroidSchedulers.mainThread())
+          .subscribe {
+            if (it.cloudAnchor.latitude != 0.0 || it.cloudAnchor.longitude != 0.0 || it.cloudAnchor.altitude != 0.0) {
+              // create friend anchor
+              placeFriendAnchor(it.cloudAnchor)
+              WaitingDialog.dismiss()
+              timer.cancel()
             }
           }
-
-        }
-      )
+      }
     }
+    timer.scheduleAtFixedRate(task, 0, 3000)
   }
 
-  /** Sets the new value of the current anchor. Detaches the old anchor, if it was non-null.  */
-  private fun setNewAnchor(newAnchor: Anchor) {
-    synchronized(anchorLock) {
-      if (currentAnchor != null) {
-        currentAnchor?.detach()
+  fun stopUpdateNavigation() {
+    timer.cancel()
+    val username = PreferenceUtils.getNickname()
+    SignService.getInstance().stopNavigate(username).observeOn(AndroidSchedulers.mainThread())
+      .subscribe {
+
       }
-      currentAnchor = newAnchor
-    }
   }
 
   var destinationAnchor: Anchor? = null
   var destinationCoordinate: GeoCoordinate? = null
 
-  private fun placeAnchor() {
+  private fun placeFriendAnchor(cloudAnchor: CloudAnchor) {
     val earth = session?.earth ?: return
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
 
-    destinationAnchor?.detach()
+    cloudAnchor.latitude = 40.2803
+    cloudAnchor.longitude = -111.6780
+
     // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
     // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
     val qx = 0f
     val qy = 0f
     val qz = 0f
-    val qw = 1f
-    val currentCoordinate = GeoCoordinate(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude, earth.cameraGeospatialPose.altitude - 1)
-    destinationCoordinate = Mercator.calculateDerivedPosition(currentCoordinate, 20.0, earth.cameraGeospatialPose.heading)
+    val qw = 0f
+    destinationCoordinate = GeoCoordinate(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude)
 
     destinationAnchor =
-      earth.createAnchor(destinationCoordinate!!.latitude, destinationCoordinate!!.longitude, destinationCoordinate!!.altitude, qx, qy, qz, qw)
+      earth.createAnchor(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude, qx, qy, qz, qw)
 
 
     activity.view.mapView?.earthMarker?.apply {
-      position = LatLng(destinationCoordinate!!.latitude, destinationCoordinate!!.longitude)
+      position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
       isVisible = true
     }
+
   }
 
   var navigationAnchor: Anchor? = null
@@ -343,21 +365,24 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     val altitude = earth.cameraGeospatialPose.altitude - 1.3
     // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
     val currentCoordinate = GeoCoordinate(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude, earth.cameraGeospatialPose.altitude)
-    val geoCoordinateAhead = Mercator.calculateDerivedPosition(currentCoordinate, 3.5, navigationHeading!!)
-    val qx = 0f
-    val qy = 0f
-    val qz = 0f
-    val qw = 1f
-    navigationAnchor = earth.createAnchor(geoCoordinateAhead.latitude, geoCoordinateAhead.longitude, altitude, qx, qy, qz, qw)
+//    val geoCoordinateAhead = Mercator.calculateDerivedPosition(currentCoordinate, 3.5, navigationHeading!!)
+//    val qx = 0f
+//    val qy = 0f
+//    val qz = 0f
+//    val qw = 1f
+//    navigationAnchor = earth.createAnchor(geoCoordinateAhead.latitude, geoCoordinateAhead.longitude, altitude, qx, qy, qz, qw)
 
     updateDistance(currentCoordinate)
-    activity.view.startMovePhoneAnim()
 
   }
 
+  var distance: Int? = null
   private fun updateDistance(currentCoordinate: GeoCoordinate) {
     destinationCoordinate?.let {
-      activity.view.updateDistanceText(currentCoordinate.calculateDistanceTo(it).toString().plus("m"))
+      distance = currentCoordinate.calculateDistanceTo(it)
+      if (distance != null && distance!! >= 8) {
+        activity.view.updateDistanceText(distance.toString().plus("m"))
+      }
     }
   }
 
@@ -373,22 +398,6 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     // Update shader properties and draw
     virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix)
     draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer)
-  }
-
-  private fun SampleRender.renderNavigationAtAnchor(anchor: Anchor) {
-    // Get the current pose of the Anchor in world space. The Anchor pose is updated
-    // during calls to session.update() as ARCore refines its estimate of the world.
-    anchor.pose.toMatrix(modelMatrix, 0)
-
-    // Calculate model/view/projection matrices
-    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0)
-    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0)
-    Matrix.scaleM(modelViewProjectionMatrix, 0, 0.2f, 0.2f, 0.2f)
-    //Matrix.rotateM(modelViewProjectionMatrix, 0, Math.toDegrees(navigationHeading!! + 90).toFloat(), 1f, 0f, 0f)
-
-    // Update shader properties and draw
-    navigationShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix)
-    draw(navigationMesh, navigationShader, virtualSceneFramebuffer)
   }
 
   private fun showError(errorMessage: String) =

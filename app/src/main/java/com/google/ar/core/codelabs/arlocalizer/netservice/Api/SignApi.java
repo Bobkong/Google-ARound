@@ -2,7 +2,9 @@ package com.google.ar.core.codelabs.arlocalizer.netservice.Api;
 
 
 
+import com.google.ar.core.codelabs.arlocalizer.model.CloudAnchor;
 import com.google.ar.core.codelabs.arlocalizer.model.GeneralResponse;
+import com.google.ar.core.codelabs.arlocalizer.model.NavigateResponse;
 import com.google.ar.core.codelabs.arlocalizer.model.User;
 
 import io.reactivex.Observable;
@@ -27,5 +29,17 @@ public interface SignApi {
             @Query("password")
             String password
             );
+
+    //navigation
+    @POST("/users/navigate")
+    Observable<NavigateResponse> navigate(
+            @Body CloudAnchor params
+    );
+
+    //stop navigation
+    @POST("/users/stopnavigate")
+    Observable<GeneralResponse> stopNavigate(
+            @Body User params
+    );
 
 }

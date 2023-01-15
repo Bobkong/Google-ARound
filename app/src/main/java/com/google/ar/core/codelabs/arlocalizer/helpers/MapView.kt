@@ -21,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.R
+import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
 
 class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
 
@@ -94,13 +95,20 @@ class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
       .draggable(false)
       .anchor(0.5f, 0.5f)
       .flat(true)
-      .visible(true)
+      .visible(false)
       .icon(BitmapDescriptorFactory.fromBitmap(createColoredMarkerBitmap(isSelf)))
     return googleMap.addMarker(markersOptions)!!
   }
 
   private fun createColoredMarkerBitmap(isSelf: Boolean): Bitmap {
-    val resource = if (isSelf) R.drawable.self_marker else R.drawable.other_marker
+    val username = PreferenceUtils.getNickname()
+    var resource: Int?
+    if (username == "Liz") {
+      resource = if (isSelf) R.drawable.female_marker else R.drawable.male_marker
+    } else {
+      resource = if (isSelf) R.drawable.male_marker else R.drawable.female_marker
+    }
+
     val opt = BitmapFactory.Options()
     opt.inMutable = true
     val navigationIcon =

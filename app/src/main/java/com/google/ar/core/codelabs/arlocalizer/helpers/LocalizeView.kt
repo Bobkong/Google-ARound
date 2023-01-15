@@ -15,33 +15,41 @@
  */
 package com.google.ar.core.codelabs.arlocalizer.helpers
 
+import android.content.Context
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.WindowManager
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.airbnb.lottie.LottieAnimationView
+import com.bumptech.glide.Glide
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Earth
 import com.google.ar.core.GeospatialPose
-import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.R
+import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
+import com.google.ar.core.codelabs.arlocalizer.utils.PixelUtil
+import com.google.ar.core.codelabs.arlocalizer.widgets.WaitingDialog
 import com.google.ar.core.examples.java.common.helpers.SnackbarHelper
 
 
 /** Contains UI elements for Hello Geo. */
 class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
+    val TAG = "LocalizeView"
     val root = View.inflate(activity, R.layout.activity_localize, null)
     val surfaceView = root.findViewById<GLSurfaceView>(R.id.surfaceview)
-    val distanceView = root.findViewById<TextView>(R.id.distance)
-    val distanceRl = root.findViewById<RelativeLayout>(R.id.distanceRl)
+    val instructionText = root.findViewById<TextView>(R.id.instruction)
     val movePhoneAnimation = root.findViewById<LottieAnimationView>(R.id.move_phone_animation)
     val movePhoneRl = root.findViewById<RelativeLayout>(R.id.move_phone_rl)
-    var hasShownMoveAnim = false
+    var isShowingNavigateAnim: Boolean? = null
+    val back = root.findViewById<ImageView>(R.id.back)
+    val navigateAnimation = root.findViewById<ImageView>(R.id.navigate_animation)
 
     val session
         get() = activity.arCoreSessionHelper.session
@@ -84,25 +92,82 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
         }
     }
 
+    init {
+        WaitingDialog.show(activity)
+        instructionText.text = "Starting Navigation Service..."
+        back.setOnClickListener {
+            WaitingDialog.dismiss()
+            activity.renderer.stopUpdateNavigation()
+            activity.finish()
+        }
+
+        val rlParams = navigateAnimation.layoutParams as ConstraintLayout.LayoutParams
+
+        val wm = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val height = wm.defaultDisplay.height
+        rlParams.height = (height - PixelUtil.convertDpToPixel(430f)).toInt()
+
+        navigateAnimation.setLayoutParams(rlParams)
+    }
+
     fun updateDistanceText(distance: String) {
-        distanceView.text = distance
-        distanceRl.visibility = View.VISIBLE
+        instructionText.text = distance
     }
 
     fun startMovePhoneAnim() {
-        if (hasShownMoveAnim) {
-            return
-        }
-        hasShownMoveAnim = true
-        movePhoneRl.visibility = View.VISIBLE
-        movePhoneAnimation.setAnimation("movephone.json")
-        movePhoneAnimation.loop(true)
-        movePhoneAnimation.playAnimation()
+        activity.runOnUiThread {
+            if (isShowingNavigateAnim == false) {
+                return@runOnUiThread
+            }
+            // hide navigate anim
+            stopNavigateAnim()
 
-        Handler(Looper.getMainLooper()).postDelayed({
+            isShowingNavigateAnim = false
+            movePhoneRl.visibility = View.VISIBLE
+            movePhoneAnimation.setAnimation("movephone.json")
+            movePhoneAnimation.loop(true)
+            movePhoneAnimation.playAnimation()
+        }
+
+    }
+
+    fun stopMovePhoneAnim() {
+        activity.runOnUiThread {
             movePhoneAnimation.pauseAnimation()
             movePhoneRl.visibility = View.GONE
-        }, 4000)
+        }
+    }
+
+    fun startNavigateAnim() {
+
+        activity.runOnUiThread {
+            if (isShowingNavigateAnim == true) {
+                return@runOnUiThread
+            }
+
+            // hide move phone anim
+            stopMovePhoneAnim()
+            isShowingNavigateAnim = true
+            Glide.with(activity)
+                .load(R.raw.navigation)
+                .into(navigateAnimation)
+            navigateAnimation.visibility = View.VISIBLE
+
+        }
+
+    }
+
+    fun stopNavigateAnim() {
+        activity.runOnUiThread {
+            navigateAnimation.visibility = View.GONE
+        }
+
+    }
+
+    fun setInstruction(hint: String) {
+        activity.runOnUiThread {
+            instructionText.text = hint
+        }
     }
 
     override fun onResume(owner: LifecycleOwner) {
@@ -111,6 +176,11 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
 
     override fun onPause(owner: LifecycleOwner) {
         surfaceView.onPause()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        WaitingDialog.dismiss()
     }
 
 }

@@ -2,7 +2,9 @@ package com.google.ar.core.codelabs.arlocalizer.netservice.Api;
 
 
 
+import com.google.ar.core.codelabs.arlocalizer.model.CloudAnchor;
 import com.google.ar.core.codelabs.arlocalizer.model.GeneralResponse;
+import com.google.ar.core.codelabs.arlocalizer.model.NavigateResponse;
 import com.google.ar.core.codelabs.arlocalizer.model.User;
 import com.google.ar.core.codelabs.arlocalizer.netservice.ARoundServiceManager;
 import com.google.ar.core.codelabs.arlocalizer.netservice.HttpResultFunc;
@@ -28,6 +30,18 @@ public class SignService {
 
     public Observable<GeneralResponse> signIn(String username, String password){
         return signApi.signIn(username, password)
+                .onErrorResumeNext(new HttpResultFunc<>())
+                .subscribeOn(Schedulers.io());
+    }
+
+    public Observable<NavigateResponse> navigate(String username, double latitude, double longitude, double altitude){
+        return signApi.navigate(new CloudAnchor(username, latitude, longitude, altitude))
+                .onErrorResumeNext(new HttpResultFunc<>())
+                .subscribeOn(Schedulers.io());
+    }
+
+    public Observable<GeneralResponse> stopNavigate(String username){
+        return signApi.stopNavigate(new User(username, ""))
                 .onErrorResumeNext(new HttpResultFunc<>())
                 .subscribeOn(Schedulers.io());
     }

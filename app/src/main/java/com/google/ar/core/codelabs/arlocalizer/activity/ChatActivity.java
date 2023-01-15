@@ -1,9 +1,11 @@
 package com.google.ar.core.codelabs.arlocalizer.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -16,6 +18,7 @@ public class ChatActivity extends Activity {
     private ImageView back;
     private ImageView friendAvatar, friendAvatar1, friendAvatar2;
     private TextView friendName, friendMsg1, navigationHint, navigationTitle;
+    private LinearLayout shareLocationLl;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +61,16 @@ public class ChatActivity extends Activity {
             navigationHint.setText("Liz wants to share her location with you");
             navigationTitle.setText("Find Liz");
         }
+
+        shareLocationLl = findViewById(R.id.share_location_ll);
+        shareLocationLl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChatActivity.this, LocalizeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
     }
 }

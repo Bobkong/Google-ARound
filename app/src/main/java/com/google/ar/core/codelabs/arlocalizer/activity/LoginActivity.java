@@ -50,9 +50,6 @@ public class LoginActivity extends Activity {
                     return;
                 }
 
-                PreferenceUtils.setUserId(userIdString);
-                PreferenceUtils.setNickname(userNickname);
-
                 WaitingDialog.show(LoginActivity.this);
                 SignService.getInstance().signIn(username.getText().toString(), password.getText().toString()).observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<GeneralResponse>() {
@@ -67,7 +64,6 @@ public class LoginActivity extends Activity {
                                 // success
                                 if (value.isSuccess()) {
                                     // save to local db
-                                    PreferenceUtils.setUserId(userIdString);
                                     PreferenceUtils.setNickname(userNickname);
                                     //PushUtils.registerPushHandler(new MyFirebaseMessagingService());
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
