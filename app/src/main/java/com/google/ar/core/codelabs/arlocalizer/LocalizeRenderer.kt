@@ -106,7 +106,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker_1.obj")
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,
