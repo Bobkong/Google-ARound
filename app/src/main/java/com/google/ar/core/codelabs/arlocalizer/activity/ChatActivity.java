@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.google.ar.core.codelabs.arlocalizer.R;
+import com.google.ar.core.codelabs.arlocalizer.consts.Configs;
 import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils;
 
 public class ChatActivity extends Activity {
@@ -67,8 +68,8 @@ public class ChatActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChatActivity.this, LocalizeActivity.class);
+                intent.putExtra("mode", Configs.chat_mode);
                 startActivity(intent);
-                finish();
             }
         });
 

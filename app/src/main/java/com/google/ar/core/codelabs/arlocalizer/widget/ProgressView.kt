@@ -6,7 +6,7 @@ import android.widget.ProgressBar
 import com.google.ar.core.codelabs.arlocalizer.R
 import com.google.ar.core.codelabs.arlocalizer.utils.DrawableUtils
 
-internal class ProgressView @JvmOverloads constructor(
+class ProgressView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : ProgressBar(context, attrs) {

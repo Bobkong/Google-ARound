@@ -24,25 +24,22 @@ import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
 import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.model.CloudAnchor
-import com.google.ar.core.codelabs.arlocalizer.netservice.Api.SignService
-import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
-import com.google.ar.core.codelabs.arlocalizer.widgets.WaitingDialog
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
 import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper
 import com.google.ar.core.examples.java.common.samplerender.*
 import com.google.ar.core.examples.java.common.samplerender.arcore.BackgroundRenderer
 import com.google.ar.core.exceptions.CameraNotAvailableException
-import io.reactivex.android.schedulers.AndroidSchedulers
 import java.io.IOException
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 
-class LocalizeRenderer(val activity: LocalizeActivity) :
+class SingleLocalizeRender(val activity: LocalizeActivity) :
   SampleRender.Renderer, DefaultLifecycleObserver {
   //<editor-fold desc="ARCore initialization" defaultstate="collapsed">
   companion object {
-    val TAG = "HelloGeoRenderer"
+    val TAG = "SingleLocalizeRender"
 
     private val Z_NEAR = 0.1f
     private val Z_FAR = 1000f
@@ -56,10 +53,6 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
   lateinit var virtualObjectMesh: Mesh
   lateinit var virtualObjectShader: Shader
   lateinit var virtualObjectTexture: Texture
-
-  lateinit var navigationMesh: Mesh
-  lateinit var navigationShader: Shader
-  lateinit var navigationTexture: Texture
 
   // Temporary matrix allocated here to reduce number of allocations for each frame.
   val modelMatrix = FloatArray(16)
@@ -115,21 +108,6 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
           /*defines=*/ null)
           .setTexture("u_Texture", virtualObjectTexture)
 
-      navigationMesh = Mesh.createFromAsset(render, "models/arrow.obj")
-      navigationTexture =
-        Texture.createFromAsset(
-          render,
-          "models/arrow_texture.png",
-          Texture.WrapMode.CLAMP_TO_EDGE,
-          Texture.ColorFormat.SRGB
-        )
-      navigationShader =
-        Shader.createFromAssets(
-          render,
-          "shaders/ar_unlit_object.vert",
-          "shaders/ar_unlit_object.frag",
-          /*defines=*/ null)
-          .setTexture("u_Texture", navigationTexture)
 
       backgroundRenderer.setUseDepthVisualization(render, false)
       backgroundRenderer.setUseOcclusion(render, false)
@@ -241,21 +219,26 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     }
 
     navigationHeading?.let {
-      if (distance != null && distance!! < 8) {
+
+
+
+      if (distance != null && distance!! < 5) {
         // reaching the destination, don't show animation
         activity.view.stopNavigateAnim()
         activity.view.stopMovePhoneAnim()
         // show success slogan
-        if (PreferenceUtils.getNickname() == "Liz") {
-          activity.view.setInstruction("Congratulations! You find Ryan!")
-        } else {
-          activity.view.setInstruction("Congratulations! You find Liz!")
-        }
+        activity.view.showLookAround("Congratulations, the destination is next to you! Look around and find it!")
       } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 20) {
-      activity.view.startNavigateAnim()
-    } else {
-      activity.view.startMovePhoneAnim()
-    }
+        //hide loading layout
+        activity.view.dismissLoadingLl()
+        // show navigate animation
+        activity.view.startNavigateAnim()
+      } else {
+        //hide loading layout
+        activity.view.dismissLoadingLl()
+        // show move animation
+        activity.view.startMovePhoneAnim()
+      }
 
     }
 
@@ -274,38 +257,12 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     }
 
     hasStartedWaiting = true
-    val username = PreferenceUtils.getNickname()
-    if (username == "Liz") {
-      activity.view.setInstruction("Waiting for Ryan to join...")
-    } else {
-      activity.view.setInstruction("Waiting for Liz to join...")
-    }
+    // create a static anchor around user
+    val pose = earth.cameraGeospatialPose
+    val anchor = CloudAnchor("",  ((pose.latitude * 10000f).roundToInt() / 10000f).toDouble(),
+      ((pose.longitude * 10000f).roundToInt() / 10000f).toDouble(), pose.altitude)
 
-    val task = object : TimerTask() {
-      override fun run() {
-
-        SignService.getInstance().navigate(username, earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude,
-        earth.cameraGeospatialPose.altitude).observeOn(AndroidSchedulers.mainThread())
-          .subscribe {
-            if (it.cloudAnchor.latitude != 0.0 || it.cloudAnchor.longitude != 0.0 || it.cloudAnchor.altitude != 0.0) {
-              // create friend anchor
-              placeFriendAnchor(it.cloudAnchor)
-              WaitingDialog.dismiss()
-              timer.cancel()
-            }
-          }
-      }
-    }
-    timer.scheduleAtFixedRate(task, 0, 3000)
-  }
-
-  fun stopUpdateNavigation() {
-    timer.cancel()
-    val username = PreferenceUtils.getNickname()
-    SignService.getInstance().stopNavigate(username).observeOn(AndroidSchedulers.mainThread())
-      .subscribe {
-
-      }
+    placeFriendAnchor(anchor)
   }
 
   var destinationAnchor: Anchor? = null
@@ -316,9 +273,6 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
-
-    cloudAnchor.latitude = 40.2803
-    cloudAnchor.longitude = -111.6780
 
     // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
     // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
@@ -333,8 +287,10 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
 
 
     activity.view.mapView?.earthMarker?.apply {
-      position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
-      isVisible = true
+      activity.runOnUiThread {
+        position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
+        isVisible = true
+      }
     }
 
   }
@@ -380,9 +336,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
   private fun updateDistance(currentCoordinate: GeoCoordinate) {
     destinationCoordinate?.let {
       distance = currentCoordinate.calculateDistanceTo(it)
-      if (distance != null && distance!! >= 8) {
-        activity.view.updateDistanceText(distance.toString().plus("m"))
-      }
+      activity.view.updateDistanceText(distance.toString().plus("m"))
     }
   }
 
@@ -394,6 +348,7 @@ class LocalizeRenderer(val activity: LocalizeActivity) :
     // Calculate model/view/projection matrices
     Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0)
     Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0)
+    Matrix.scaleM(modelViewProjectionMatrix, 0, 0.6f, 0.6f, 0.6f)
 
     // Update shader properties and draw
     virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix)

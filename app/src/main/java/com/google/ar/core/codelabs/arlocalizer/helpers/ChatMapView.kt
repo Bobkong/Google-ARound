@@ -23,7 +23,7 @@ import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.R
 import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
 
-class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
+open class ChatMapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
 
   var setInitialCameraPosition = false
   val cameraMarker = createMarker(true)
@@ -100,7 +100,7 @@ class MapView(val activity: LocalizeActivity, val googleMap: GoogleMap) {
     return googleMap.addMarker(markersOptions)!!
   }
 
-  private fun createColoredMarkerBitmap(isSelf: Boolean): Bitmap {
+  open fun createColoredMarkerBitmap(isSelf: Boolean): Bitmap {
     val username = PreferenceUtils.getNickname()
     var resource: Int?
     if (username == "Liz") {

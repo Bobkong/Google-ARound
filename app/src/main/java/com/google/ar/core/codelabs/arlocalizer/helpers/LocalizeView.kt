@@ -22,6 +22,7 @@ import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -34,29 +35,35 @@ import com.google.ar.core.Earth
 import com.google.ar.core.GeospatialPose
 import com.google.ar.core.codelabs.arlocalizer.R
 import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
+import com.google.ar.core.codelabs.arlocalizer.consts.Configs
 import com.google.ar.core.codelabs.arlocalizer.utils.PixelUtil
-import com.google.ar.core.codelabs.arlocalizer.widgets.WaitingDialog
+import com.google.ar.core.codelabs.arlocalizer.widget.ProgressView
 import com.google.ar.core.examples.java.common.helpers.SnackbarHelper
 
 
 /** Contains UI elements for Hello Geo. */
-class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
+class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifecycleObserver {
     val TAG = "LocalizeView"
     val root = View.inflate(activity, R.layout.activity_localize, null)
     val surfaceView = root.findViewById<GLSurfaceView>(R.id.surfaceview)
-    val instructionText = root.findViewById<TextView>(R.id.instruction)
+    val distanceText = root.findViewById<TextView>(R.id.distance_text)
     val movePhoneAnimation = root.findViewById<LottieAnimationView>(R.id.move_phone_animation)
     val movePhoneRl = root.findViewById<RelativeLayout>(R.id.move_phone_rl)
     var isShowingNavigateAnim: Boolean? = null
     val back = root.findViewById<ImageView>(R.id.back)
     val navigateAnimation = root.findViewById<ImageView>(R.id.navigate_animation)
+    val distanceRl = root.findViewById<RelativeLayout>(R.id.distance_rl)
+    val loadingLl = root.findViewById<LinearLayout>(R.id.loading_ll)
+    val loadingText = root.findViewById<TextView>(R.id.loading_text)
+    val lookAroundAnimation = root.findViewById<LottieAnimationView>(R.id.look_around_animation)
+    val progressAnimation = root.findViewById<ProgressView>(R.id.rotateloading)
 
     val session
         get() = activity.arCoreSessionHelper.session
 
     val snackbarHelper = SnackbarHelper()
 
-    var mapView: MapView? = null
+    var mapView: ChatMapView? = null
     val mapTouchWrapper = root.findViewById<MapTouchWrapper>(R.id.map_wrapper).apply {
         setup { screenLocation ->
 //            val latLng: LatLng =
@@ -66,7 +73,8 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
     }
     val mapFragment =
         (activity.supportFragmentManager.findFragmentById(R.id.map)!! as SupportMapFragment).also {
-            it.getMapAsync { googleMap -> mapView = MapView(activity, googleMap) }
+            it.getMapAsync { googleMap -> mapView = if (mode == Configs.chat_mode) ChatMapView(activity, googleMap)
+            else StaticMapView(activity, googleMap)}
         }
 
     val statusText = root.findViewById<TextView>(R.id.statusText)
@@ -93,11 +101,7 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
     }
 
     init {
-        WaitingDialog.show(activity)
-        instructionText.text = "Starting Navigation Service..."
         back.setOnClickListener {
-            WaitingDialog.dismiss()
-            activity.renderer.stopUpdateNavigation()
             activity.finish()
         }
 
@@ -111,7 +115,8 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
     }
 
     fun updateDistanceText(distance: String) {
-        instructionText.text = distance
+        distanceRl.visibility = View.VISIBLE
+        distanceText.text = distance
     }
 
     fun startMovePhoneAnim() {
@@ -164,9 +169,44 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
 
     }
 
-    fun setInstruction(hint: String) {
+    fun showLoading(hint: String) {
         activity.runOnUiThread {
-            instructionText.text = hint
+            loadingText.text = hint
+            lookAroundAnimation.visibility = View.GONE
+            progressAnimation.visibility = View.VISIBLE
+            loadingLl.visibility = View.VISIBLE
+        }
+    }
+
+    var hasShownLookAroundAnim = false
+    fun showLookAround(hint: String) {
+        if (hasShownLookAroundAnim) {
+            return
+        }
+        hasShownLookAroundAnim = true
+        activity.runOnUiThread {
+            loadingText.text = hint
+            progressAnimation.visibility = View.GONE
+            lookAroundAnimation.visibility = View.VISIBLE
+            loadingLl.visibility = View.VISIBLE
+
+            if (!lookAroundAnimation.isAnimating) {
+                lookAroundAnimation.setAnimation("look_around.json")
+                lookAroundAnimation.loop(true)
+                lookAroundAnimation.playAnimation()
+            }
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                lookAroundAnimation.pauseAnimation()
+                loadingLl.visibility = View.GONE
+            }, 5000)
+
+        }
+    }
+
+    fun dismissLoadingLl() {
+        activity.runOnUiThread {
+            loadingLl.visibility = View.GONE
         }
     }
 
@@ -180,7 +220,6 @@ class LocalizeView(val activity: LocalizeActivity) : DefaultLifecycleObserver {
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        WaitingDialog.dismiss()
     }
 
 }

@@ -11,4 +11,8 @@ public interface Configs {
 
     // intent extra
     String drugDetailFromScene = "drugDetailFromScene";
+
+    // localize mode
+    int chat_mode = 0;
+    int static_mode = 1;
 }

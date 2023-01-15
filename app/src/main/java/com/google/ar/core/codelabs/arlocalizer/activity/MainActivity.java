@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.ar.core.codelabs.arlocalizer.R;
+import com.google.ar.core.codelabs.arlocalizer.consts.Configs;
 import com.google.ar.core.codelabs.arlocalizer.model.GeneralResponse;
 import com.google.ar.core.codelabs.arlocalizer.netservice.Api.SignService;
 import com.google.ar.core.codelabs.arlocalizer.utils.PasswordEncryptUtil;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, LocalizeActivity.class);
+                intent.putExtra("mode", Configs.static_mode);
                 startActivity(intent);
             }
         });

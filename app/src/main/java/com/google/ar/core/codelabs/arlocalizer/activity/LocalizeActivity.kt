@@ -19,14 +19,19 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LifecycleObserver
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import com.google.ar.core.codelabs.arlocalizer.LocalizeRenderer
+import com.google.ar.core.codelabs.arlocalizer.ChatLocalizeRenderer
+import com.google.ar.core.codelabs.arlocalizer.SingleLocalizeRender
+import com.google.ar.core.codelabs.arlocalizer.consts.Configs
 import com.google.ar.core.codelabs.arlocalizer.helpers.ARCoreSessionLifecycleHelper
 import com.google.ar.core.codelabs.arlocalizer.helpers.GeoPermissionsHelper
 import com.google.ar.core.codelabs.arlocalizer.helpers.LocalizeView
+import com.google.ar.core.codelabs.arlocalizer.helpers.StaticMapView
 import com.google.ar.core.examples.java.common.helpers.FullScreenHelper
 import com.google.ar.core.examples.java.common.samplerender.SampleRender
+import com.google.ar.core.examples.java.common.samplerender.SampleRender.Renderer
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.UnavailableApkTooOldException
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
@@ -40,11 +45,13 @@ class LocalizeActivity : AppCompatActivity() {
 
   lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
   lateinit var view: LocalizeView
-  lateinit var renderer: LocalizeRenderer
+  lateinit var chatRenderer: ChatLocalizeRenderer
+  lateinit var singleRenderer: SingleLocalizeRender
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    val localizeMode = intent.getIntExtra("mode", Configs.static_mode)
     // Setup ARCore session lifecycle helper and configuration.
     arCoreSessionHelper = ARCoreSessionLifecycleHelper(this)
     // If Session creation or Session.resume() fails, display a message and log detailed
@@ -69,17 +76,29 @@ class LocalizeActivity : AppCompatActivity() {
     arCoreSessionHelper.beforeSessionResume = ::configureSession
     lifecycle.addObserver(arCoreSessionHelper)
 
-    // Set up the Hello AR renderer.
-    renderer = LocalizeRenderer(this)
-    lifecycle.addObserver(renderer)
 
     // Set up Hello AR UI.
-    view = LocalizeView(this)
+    view = LocalizeView(this, localizeMode)
     lifecycle.addObserver(view)
     setContentView(view.root)
 
-    // Sets up an example renderer using our HelloGeoRenderer.
-    SampleRender(view.surfaceView, renderer, assets)
+    if (localizeMode == Configs.chat_mode) {
+      // Set up the Hello AR renderer.
+      chatRenderer = ChatLocalizeRenderer(this)
+      lifecycle.addObserver(chatRenderer)
+
+      // Sets up an example renderer using our HelloGeoRenderer.
+      SampleRender(view.surfaceView, chatRenderer, assets)
+    } else {
+      // Set up the Hello AR renderer.
+      singleRenderer = SingleLocalizeRender(this)
+      lifecycle.addObserver(singleRenderer)
+
+      // Sets up an example renderer using our HelloGeoRenderer.
+      SampleRender(view.surfaceView, singleRenderer, assets)
+    }
+
+
   }
 
   // Configure the session, setting the desired options according to your usecase.
