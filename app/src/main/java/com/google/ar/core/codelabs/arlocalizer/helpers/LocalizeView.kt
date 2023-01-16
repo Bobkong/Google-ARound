@@ -57,6 +57,7 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
     val loadingText = root.findViewById<TextView>(R.id.loading_text)
     val lookAroundAnimation = root.findViewById<LottieAnimationView>(R.id.look_around_animation)
     val progressAnimation = root.findViewById<ProgressView>(R.id.rotateloading)
+    val navigationAnimLl = root.findViewById<LinearLayout>(R.id.navigate_animation_ll)
 
     val session
         get() = activity.arCoreSessionHelper.session
@@ -105,11 +106,11 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
             activity.finish()
         }
 
-        val rlParams = navigateAnimation.layoutParams as ConstraintLayout.LayoutParams
+        val rlParams = navigateAnimation.layoutParams as LinearLayout.LayoutParams
 
         val wm = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val height = wm.defaultDisplay.height
-        rlParams.height = (height - PixelUtil.convertDpToPixel(430f)).toInt()
+        rlParams.height = (height - PixelUtil.convertDpToPixel(460f)).toInt()
 
         navigateAnimation.setLayoutParams(rlParams)
     }
@@ -156,7 +157,7 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
             Glide.with(activity)
                 .load(R.raw.navigation)
                 .into(navigateAnimation)
-            navigateAnimation.visibility = View.VISIBLE
+            navigationAnimLl.visibility = View.VISIBLE
 
         }
 
@@ -164,7 +165,7 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
 
     fun stopNavigateAnim() {
         activity.runOnUiThread {
-            navigateAnimation.visibility = View.GONE
+            navigationAnimLl.visibility = View.GONE
         }
 
     }

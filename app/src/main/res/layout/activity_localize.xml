@@ -62,19 +62,39 @@
 
 
 
-  <ImageView
-      android:id="@+id/navigate_animation"
-      android:layout_width="200dp"
-      android:layout_height="400dp"
-      app:lottie_autoPlay="true"
-      app:lottie_loop="true"
-      android:scaleType="fitXY"
+  <LinearLayout
+      android:id="@+id/navigate_animation_ll"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintRight_toRightOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/top_bar"
       app:layout_constraintBottom_toTopOf="@+id/map_wrapper"
       android:visibility="gone"
-      android:layout_centerHorizontal="true"/>
+      android:orientation="vertical"
+      >
+    <ImageView
+        android:id="@+id/navigate_animation"
+        android:layout_width="200dp"
+        android:layout_height="400dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="fitXY" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#ffffff"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="64dp"
+        android:layout_marginRight="64dp"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:text="Please mind your step when navigating"/>
+
+  </LinearLayout>
+
 
 
 
@@ -170,6 +190,7 @@
       android:id="@+id/map_wrapper"
       android:layout_width="match_parent"
       android:layout_height="300dp"
+      android:visibility="gone"
       app:layout_constraintBottom_toBottomOf="parent">
 
     <com.google.ar.core.codelabs.arlocalizer.widget.RadiusCardView

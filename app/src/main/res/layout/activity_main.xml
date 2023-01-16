@@ -76,14 +76,13 @@
 
         <ImageView
             android:id="@+id/try_cloud_icon"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:src="@drawable/main_user"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/try_cloud_text"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBaseline_toBottomOf="parent"
-            android:layout_marginLeft="8dp"/>
+            app:layout_constraintBaseline_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/try_cloud_title"
@@ -102,7 +101,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/black"
+            android:textColor="@color/grey"
             android:text="Track cloud anchor of another user"
             android:layout_marginTop="4dp"
             app:layout_constraintRight_toLeftOf="@+id/try_cloud_icon"
@@ -142,7 +141,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/black"
+            android:textColor="@color/grey"
             android:text="A default ahead 10 meters location"
             android:layout_marginTop="4dp"
             app:layout_constraintRight_toRightOf="parent"

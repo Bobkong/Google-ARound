@@ -17,6 +17,7 @@ package com.google.ar.core.codelabs.arlocalizer
 
 import android.opengl.Matrix
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.model.LatLng
@@ -322,6 +323,7 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
       earth.createAnchor(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude - 1.5, qx, qy, qz, qw)
 
 
+    activity.view.mapTouchWrapper.visibility = View.VISIBLE
     activity.view.mapView?.earthMarker?.apply {
       position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
       isVisible = true
