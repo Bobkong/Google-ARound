@@ -38,6 +38,7 @@ import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.consts.Configs
 import com.google.ar.core.codelabs.arlocalizer.utils.PixelUtil
 import com.google.ar.core.codelabs.arlocalizer.widget.ProgressView
+import com.google.ar.core.codelabs.arlocalizer.widgets.TrapezoidView
 import com.google.ar.core.examples.java.common.helpers.SnackbarHelper
 
 
@@ -46,18 +47,18 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
     val TAG = "LocalizeView"
     val root = View.inflate(activity, R.layout.activity_localize, null)
     val surfaceView = root.findViewById<GLSurfaceView>(R.id.surfaceview)
-    val distanceText = root.findViewById<TextView>(R.id.distance_text)
+    val distanceText = root.findViewById<TextView>(R.id.topbar_text)
     val movePhoneAnimation = root.findViewById<LottieAnimationView>(R.id.move_phone_animation)
     val movePhoneRl = root.findViewById<RelativeLayout>(R.id.move_phone_rl)
     var isShowingNavigateAnim: Boolean? = null
-    val back = root.findViewById<ImageView>(R.id.back)
+    val back = root.findViewById<LinearLayout>(R.id.exit_ll)
     val navigateAnimation = root.findViewById<ImageView>(R.id.navigate_animation)
-    val distanceRl = root.findViewById<RelativeLayout>(R.id.distance_rl)
     val loadingLl = root.findViewById<LinearLayout>(R.id.loading_ll)
     val loadingText = root.findViewById<TextView>(R.id.loading_text)
     val lookAroundAnimation = root.findViewById<LottieAnimationView>(R.id.look_around_animation)
     val progressAnimation = root.findViewById<ProgressView>(R.id.rotateloading)
-    val navigationAnimLl = root.findViewById<LinearLayout>(R.id.navigate_animation_ll)
+    val navigationAnimLl = root.findViewById<ConstraintLayout>(R.id.navigate_animation_ll)
+    val trapezoid = root.findViewById<TrapezoidView>(R.id.trapezoid)
 
     val session
         get() = activity.arCoreSessionHelper.session
@@ -106,17 +107,21 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
             activity.finish()
         }
 
-        val rlParams = navigateAnimation.layoutParams as LinearLayout.LayoutParams
+        val animationParam = navigateAnimation.layoutParams as ConstraintLayout.LayoutParams
+        val trapezoidParam = trapezoid.layoutParams as ConstraintLayout.LayoutParams
 
         val wm = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val height = wm.defaultDisplay.height
-        rlParams.height = (height - PixelUtil.convertDpToPixel(460f)).toInt()
+        animationParam.height = (height - PixelUtil.convertDpToPixel(460f)).toInt()
 
-        navigateAnimation.setLayoutParams(rlParams)
+        trapezoidParam.width = animationParam.width
+        trapezoidParam.height = animationParam.height
+        navigateAnimation.layoutParams = animationParam
+        trapezoid.layoutParams = trapezoidParam
+
     }
 
     fun updateDistanceText(distance: String) {
-        distanceRl.visibility = View.VISIBLE
         distanceText.text = distance
     }
 
@@ -127,6 +132,8 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
             }
             // hide navigate anim
             stopNavigateAnim()
+            stopLookAround()
+            dismissLoadingLl()
 
             isShowingNavigateAnim = false
             movePhoneRl.visibility = View.VISIBLE
@@ -153,6 +160,9 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
 
             // hide move phone anim
             stopMovePhoneAnim()
+            stopLookAround()
+            dismissLoadingLl()
+
             isShowingNavigateAnim = true
             Glide.with(activity)
                 .load(R.raw.navigation)
@@ -172,20 +182,22 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
 
     fun showLoading(hint: String) {
         activity.runOnUiThread {
-            loadingText.text = hint
+            distanceText.text = hint
             lookAroundAnimation.visibility = View.GONE
             progressAnimation.visibility = View.VISIBLE
             loadingLl.visibility = View.VISIBLE
         }
     }
 
-    var hasShownLookAroundAnim = false
     fun showLookAround(hint: String) {
-        if (hasShownLookAroundAnim) {
-            return
-        }
-        hasShownLookAroundAnim = true
+
         activity.runOnUiThread {
+
+            // reaching the destination, don't show animation
+            activity.view.stopNavigateAnim()
+            activity.view.stopMovePhoneAnim()
+            dismissLoadingLl()
+
             loadingText.text = hint
             progressAnimation.visibility = View.GONE
             lookAroundAnimation.visibility = View.VISIBLE
@@ -196,12 +208,13 @@ class LocalizeView(val activity: LocalizeActivity, val mode: Int) : DefaultLifec
                 lookAroundAnimation.loop(true)
                 lookAroundAnimation.playAnimation()
             }
+        }
+    }
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                lookAroundAnimation.pauseAnimation()
-                loadingLl.visibility = View.GONE
-            }, 5000)
-
+    fun stopLookAround() {
+        activity.runOnUiThread {
+            lookAroundAnimation.pauseAnimation()
+            loadingLl.visibility = View.GONE
         }
     }
 

@@ -49,8 +49,8 @@ public class ChatActivity extends Activity {
             friendAvatar2.setImageResource(R.drawable.avatar_male);
 
             friendName.setText("Ryan");
-            friendMsg1.setText("Hey Liz! Where are you? Here are so many people, I can't find you.");
-            navigationHint.setText("Ryan wants to share her location with you");
+            friendMsg1.setText("Hey Liz! Where is your apartment building? So many buildings and entrances...");
+            navigationHint.setText("You wants to share you location with Ryan");
             navigationTitle.setText("Find Ryan");
         } else {
             friendAvatar.setImageResource(R.drawable.avatar_female);
@@ -58,8 +58,8 @@ public class ChatActivity extends Activity {
             friendAvatar2.setImageResource(R.drawable.avatar_female);
 
             friendName.setText("Liz");
-            friendMsg1.setText("Hey Ryan! Where are you? Here are so many people, I can't find you.");
-            navigationHint.setText("Liz wants to share her location with you");
+            friendMsg1.setText("Hey Ryan! Where is your apartment building? So many buildings and entrances...");
+            navigationHint.setText("You wants to share your location with Liz");
             navigationTitle.setText("Find Liz");
         }
 

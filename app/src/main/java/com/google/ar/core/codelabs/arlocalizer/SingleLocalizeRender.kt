@@ -17,6 +17,7 @@ package com.google.ar.core.codelabs.arlocalizer
 
 import android.opengl.Matrix
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.model.LatLng
@@ -222,20 +223,13 @@ class SingleLocalizeRender(val activity: LocalizeActivity) :
 
 
 
-      if (distance != null && distance!! < 5) {
-        // reaching the destination, don't show animation
-        activity.view.stopNavigateAnim()
-        activity.view.stopMovePhoneAnim()
+      if (distance != null && distance!! < 17) {
         // show success slogan
         activity.view.showLookAround("Congratulations, the destination is next to you! Look around and find it!")
       } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 20) {
-        //hide loading layout
-        activity.view.dismissLoadingLl()
         // show navigate animation
         activity.view.startNavigateAnim()
       } else {
-        //hide loading layout
-        activity.view.dismissLoadingLl()
         // show move animation
         activity.view.startMovePhoneAnim()
       }
@@ -262,7 +256,9 @@ class SingleLocalizeRender(val activity: LocalizeActivity) :
     val anchor = CloudAnchor("",  ((pose.latitude * 10000f).roundToInt() / 10000f).toDouble(),
       ((pose.longitude * 10000f).roundToInt() / 10000f).toDouble(), pose.altitude)
 
-    placeFriendAnchor(anchor)
+    activity.runOnUiThread {
+      placeFriendAnchor(anchor)
+    }
   }
 
   var destinationAnchor: Anchor? = null
@@ -286,12 +282,16 @@ class SingleLocalizeRender(val activity: LocalizeActivity) :
       earth.createAnchor(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude, qx, qy, qz, qw)
 
 
+    activity.view.mapTouchWrapper.visibility = View.VISIBLE
     activity.view.mapView?.earthMarker?.apply {
       activity.runOnUiThread {
         position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
         isVisible = true
       }
     }
+
+//    activity.view.mapView?.showRoute(LatLng(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude), LatLng(cloudAnchor.latitude, cloudAnchor.longitude))
+
 
   }
 
@@ -335,9 +335,13 @@ class SingleLocalizeRender(val activity: LocalizeActivity) :
   var distance: Int? = null
   private fun updateDistance(currentCoordinate: GeoCoordinate) {
     destinationCoordinate?.let {
-      distance = currentCoordinate.calculateDistanceTo(it)
-      activity.view.updateDistanceText(distance.toString().plus("m"))
+      distance = convertMeterToFoot(currentCoordinate.calculateDistanceTo(it))
+      activity.view.updateDistanceText(distance.toString().plus(" ft").plus(" · ").plus((distance!! / 282) + 1).toString().plus(" min"))
     }
+  }
+
+  fun convertMeterToFoot(meter: Int): Int {
+    return (meter * 3.28084).toInt()
   }
 
   private fun SampleRender.renderCompassAtAnchor(anchor: Anchor) {

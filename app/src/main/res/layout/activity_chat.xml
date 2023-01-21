@@ -72,8 +72,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:textSize="16sp"
-                android:text="Hey Ryan! Where are you? Here are so many people, I can't find you."/>
+                android:textSize="16sp"/>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -99,10 +98,11 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                android:text="Crazy...I also can't find you 😭"/>
+                android:text="You're right... Where are you right now?"/>
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/message_3"
@@ -136,41 +136,41 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                android:text="Wait a second, I found a new feature developed by Google ARound!"/>
+                android:text="I don't even know which building I'm next to. 😭"/>
         </LinearLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/message_4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="48dp"
-        android:layout_marginLeft="52dp"
+        android:layout_marginLeft="48dp"
         app:layout_constraintTop_toBottomOf="@+id/message_3"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="24dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="12dp"
             android:padding="12dp"
-            android:background="@drawable/friend_message_bg">
+            android:background="@drawable/my_message_bg">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="16sp"
-                android:text="Here!!👇"/>
-
+                android:text="Let's do this. Share live location and I can find you with AR guidance. Here!!👇"/>
         </LinearLayout>
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/share_location_hint"

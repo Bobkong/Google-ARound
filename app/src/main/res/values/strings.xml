@@ -18,5 +18,5 @@
   <string translatable="false" name="app_name">Google ARound</string>
   <string translatable="false" name="geospatial_pose">LAT/LNG: %.6f˚, %.6f˚\n\t\t\tACCURACY: %.2fm\nALTITUDE: %.2fm\n\t\t\tACCURACY: %.2fm\nHEADING: %.1f˚\n\t\t\tACCURACY: %.1f˚</string>
   <string name="earth_state">EarthState: %1$s\nTrackingState: %2$s\n%3$s</string>
-    <string name="move_phone_instruction">Move your phone and find the navigation guide. You can also zoom the map to get a more specific direction.</string>
+    <string name="move_phone_instruction">Move your phone and find the navigation guide.</string>
 </resources>

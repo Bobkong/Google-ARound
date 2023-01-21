@@ -5,6 +5,7 @@
     <color name="theme_color">#3771E0</color>
     <color name="transparent">#00000000</color>
     <color name="transparent_theme_color">#003771E0</color>
+    <color name="transparent_60_theme_color">#993771E0</color>
     <color name="transparent_10_theme_color">#1A3771E0</color>
     <color name="bg_color">#0D3771E0</color>
     <color name="grey">#555555</color>

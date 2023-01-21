@@ -226,10 +226,7 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
 
 
 
-      if (distance != null && distance!! < 5) {
-        // reaching the destination, don't show animation
-        activity.view.stopNavigateAnim()
-        activity.view.stopMovePhoneAnim()
+      if (distance != null && distance!! < 17) {
         // show success slogan
         if (PreferenceUtils.getNickname() == "Liz") {
           activity.view.showLookAround("Congratulations, Ryan is next to you! Look around and find him!")
@@ -237,13 +234,9 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
           activity.view.showLookAround("Congratulations, Liz is next to you! Look around and find her!")
         }
       } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 20) {
-        //hide loading layout
-        activity.view.dismissLoadingLl()
         // show navigate animation
         activity.view.startNavigateAnim()
       } else {
-        //hide loading layout
-        activity.view.dismissLoadingLl()
         // show move animation
         activity.view.startMovePhoneAnim()
       }
@@ -268,9 +261,9 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
     val username = PreferenceUtils.getNickname()
     if (destinationCoordinate == null) {
       if (username == "Liz") {
-        activity.view.showLoading("Waiting for Ryan to join...")
+        activity.view.showLoading("Waiting for Ryan...")
       } else {
-        activity.view.showLoading("Waiting for Liz to join...")
+        activity.view.showLoading("Waiting for Liz...")
       }
     }
 
@@ -291,15 +284,6 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
       }
     }
     timer.scheduleAtFixedRate(task, 0, 3000)
-  }
-
-  fun stopUpdateNavigation() {
-    timer.cancel()
-    val username = PreferenceUtils.getNickname()
-    SignService.getInstance().stopNavigate(username).observeOn(AndroidSchedulers.mainThread())
-      .subscribe {
-
-      }
   }
 
   var destinationAnchor: Anchor? = null
@@ -328,6 +312,8 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
       position = LatLng(cloudAnchor.latitude, cloudAnchor.longitude)
       isVisible = true
     }
+
+//    activity.view.mapView?.showRoute(LatLng(earth.cameraGeospatialPose.latitude, earth.cameraGeospatialPose.longitude), LatLng(cloudAnchor.latitude, cloudAnchor.longitude))
 
   }
 
@@ -362,10 +348,15 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
   var distance: Int? = null
   private fun updateDistance(currentCoordinate: GeoCoordinate) {
     destinationCoordinate?.let {
-      distance = currentCoordinate.calculateDistanceTo(it)
-      activity.view.updateDistanceText(distance.toString().plus("m"))
+      distance = convertMeterToFoot(currentCoordinate.calculateDistanceTo(it))
+      activity.view.updateDistanceText(distance.toString().plus(" ft").plus(" · ").plus((distance!! / 282) + 1).toString().plus(" min"))
     }
   }
+
+  fun convertMeterToFoot(meter: Int): Int {
+    return (meter * 3.28084).toInt()
+  }
+
 
   private fun SampleRender.renderCompassAtAnchor(anchor: Anchor) {
     // Get the current pose of the Anchor in world space. The Anchor pose is updated
