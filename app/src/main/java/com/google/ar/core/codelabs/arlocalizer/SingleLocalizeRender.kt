@@ -254,7 +254,7 @@ class SingleLocalizeRender(val activity: LocalizeActivity) :
     // create a static anchor around user
     val pose = earth.cameraGeospatialPose
     val anchor = CloudAnchor("",  ((pose.latitude * 10000f).roundToInt() / 10000f).toDouble(),
-      ((pose.longitude * 10000f).roundToInt() / 10000f).toDouble(), pose.altitude)
+      ((pose.longitude * 1000f).roundToInt() / 1000f).toDouble(), pose.altitude)
 
     activity.runOnUiThread {
       placeFriendAnchor(anchor)

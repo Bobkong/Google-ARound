@@ -29,6 +29,8 @@ import com.google.ar.core.codelabs.arlocalizer.helpers.ARCoreSessionLifecycleHel
 import com.google.ar.core.codelabs.arlocalizer.helpers.GeoPermissionsHelper
 import com.google.ar.core.codelabs.arlocalizer.helpers.LocalizeView
 import com.google.ar.core.codelabs.arlocalizer.helpers.StaticMapView
+import com.google.ar.core.codelabs.arlocalizer.netservice.Api.SignService
+import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
 import com.google.ar.core.examples.java.common.helpers.FullScreenHelper
 import com.google.ar.core.examples.java.common.samplerender.SampleRender
 import com.google.ar.core.examples.java.common.samplerender.SampleRender.Renderer
@@ -37,6 +39,7 @@ import com.google.ar.core.exceptions.UnavailableApkTooOldException
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 class LocalizeActivity : AppCompatActivity() {
   companion object {
@@ -47,11 +50,12 @@ class LocalizeActivity : AppCompatActivity() {
   lateinit var view: LocalizeView
   lateinit var chatRenderer: ChatLocalizeRenderer
   lateinit var singleRenderer: SingleLocalizeRender
+  var localizeMode: Int = Configs.static_mode
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val localizeMode = intent.getIntExtra("mode", Configs.static_mode)
+    localizeMode = intent.getIntExtra("mode", Configs.static_mode)
     // Setup ARCore session lifecycle helper and configuration.
     arCoreSessionHelper = ARCoreSessionLifecycleHelper(this)
     // If Session creation or Session.resume() fails, display a message and log detailed
@@ -132,5 +136,17 @@ class LocalizeActivity : AppCompatActivity() {
   override fun onWindowFocusChanged(hasFocus: Boolean) {
     super.onWindowFocusChanged(hasFocus)
     FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
+  }
+
+  override fun onDestroy() {
+    if (localizeMode == Configs.chat_mode) {
+      // reset user location
+      SignService.getInstance().stopNavigate(PreferenceUtils.getNickname()).observeOn(
+        AndroidSchedulers.mainThread())
+        .subscribe {
+        }
+    }
+    super.onDestroy()
+
   }
 }

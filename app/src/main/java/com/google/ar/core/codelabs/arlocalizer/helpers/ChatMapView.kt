@@ -72,30 +72,35 @@ open class ChatMapView(val activity: LocalizeActivity, val googleMap: GoogleMap)
 
 
 
-      if (earthMarker.position.latitude != 0.0 || earthMarker.position.longitude != 0.0) {
-        val builder = LatLngBounds.Builder()
-        builder.include(cameraMarker.position)
-        builder.include(earthMarker.position)
-        val bounds = builder.build()
-        val padding = 64 // offset from edges of the map in pixels
+      try {
+        if (earthMarker.position.latitude != 0.0 && earthMarker.position.longitude != 0.0) {
+          val builder = LatLngBounds.Builder()
+          builder.include(cameraMarker.position)
+          builder.include(earthMarker.position)
+          val bounds = builder.build()
+          val padding = 64 // offset from edges of the map in pixels
 
-        val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-        googleMap.moveCamera(cu)
-      } else {
-        val cameraPositionBuilder: CameraPosition.Builder = if (!setInitialCameraPosition) {
-          // Set the camera position with an initial default zoom level.
-          setInitialCameraPosition = true
-          CameraPosition.Builder().zoom(21f).target(position)
+          val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+          googleMap.moveCamera(cu)
         } else {
-          // Set the camera position and keep the same zoom level.
-          CameraPosition.Builder()
-            .zoom(googleMap.cameraPosition.zoom)
-            .target(position)
-        }
-        googleMap.moveCamera(
-          CameraUpdateFactory.newCameraPosition(cameraPositionBuilder.build()))
+          val cameraPositionBuilder: CameraPosition.Builder = if (!setInitialCameraPosition) {
+            // Set the camera position with an initial default zoom level.
+            setInitialCameraPosition = true
+            CameraPosition.Builder().zoom(21f).target(position)
+          } else {
+            // Set the camera position and keep the same zoom level.
+            CameraPosition.Builder()
+              .zoom(googleMap.cameraPosition.zoom)
+              .target(position)
+          }
+          googleMap.moveCamera(
+            CameraUpdateFactory.newCameraPosition(cameraPositionBuilder.build()))
 
+        }
+      } catch (t: Throwable) {
+        Log.e("throwable", t.toString())
       }
+
 
     }
 

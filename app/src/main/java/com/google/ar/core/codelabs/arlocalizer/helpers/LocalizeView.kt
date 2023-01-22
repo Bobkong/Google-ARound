@@ -36,10 +36,14 @@ import com.google.ar.core.GeospatialPose
 import com.google.ar.core.codelabs.arlocalizer.R
 import com.google.ar.core.codelabs.arlocalizer.activity.LocalizeActivity
 import com.google.ar.core.codelabs.arlocalizer.consts.Configs
+import com.google.ar.core.codelabs.arlocalizer.netservice.Api.SignService
 import com.google.ar.core.codelabs.arlocalizer.utils.PixelUtil
+import com.google.ar.core.codelabs.arlocalizer.utils.PreferenceUtils
 import com.google.ar.core.codelabs.arlocalizer.widget.ProgressView
 import com.google.ar.core.codelabs.arlocalizer.widgets.TrapezoidView
+import com.google.ar.core.codelabs.arlocalizer.widgets.WaitingDialog
 import com.google.ar.core.examples.java.common.helpers.SnackbarHelper
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 
 /** Contains UI elements for Hello Geo. */

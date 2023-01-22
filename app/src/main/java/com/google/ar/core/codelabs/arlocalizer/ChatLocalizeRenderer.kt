@@ -233,7 +233,7 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
         } else {
           activity.view.showLookAround("Congratulations, Liz is next to you! Look around and find her!")
         }
-      } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 20) {
+      } else if (abs(earth!!.cameraGeospatialPose.heading.minus(it)) < 25) {
         // show navigate animation
         activity.view.startNavigateAnim()
       } else {
