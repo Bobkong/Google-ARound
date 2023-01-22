@@ -145,6 +145,8 @@ class LocalizeActivity : AppCompatActivity() {
         AndroidSchedulers.mainThread())
         .subscribe {
         }
+
+      chatRenderer.stopNavigationTimer()
     }
     super.onDestroy()
 

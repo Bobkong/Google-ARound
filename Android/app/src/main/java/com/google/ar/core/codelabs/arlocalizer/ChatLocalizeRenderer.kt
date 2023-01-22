@@ -286,6 +286,10 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
     timer.scheduleAtFixedRate(task, 0, 3000)
   }
 
+  fun stopNavigationTimer() {
+    timer.cancel()
+  }
+
   var destinationAnchor: Anchor? = null
   var destinationCoordinate: GeoCoordinate? = null
 
