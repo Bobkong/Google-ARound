@@ -25,7 +25,7 @@ public class SplashActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
             // determine go to MainActivity or OnboardingActivity
-            if (PreferenceUtils.getUserId().length() == 0){
+            if (PreferenceUtils.getNickname().length() == 0){
                 startActivity(new Intent(SplashActivity.this, LoginActivity.class));
             }else {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
