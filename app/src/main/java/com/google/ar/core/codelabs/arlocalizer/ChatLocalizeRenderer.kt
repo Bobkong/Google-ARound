@@ -304,7 +304,7 @@ class ChatLocalizeRenderer(val activity: LocalizeActivity) :
     destinationCoordinate = GeoCoordinate(cloudAnchor.latitude, cloudAnchor.longitude, cloudAnchor.altitude)
 
     destinationAnchor =
-      earth.createAnchor(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude - 1.5, qx, qy, qz, qw)
+      earth.createAnchor(cloudAnchor.latitude, cloudAnchor.longitude, earth.cameraGeospatialPose.altitude - 1.2, qx, qy, qz, qw)
 
 
     activity.view.mapTouchWrapper.visibility = View.VISIBLE
