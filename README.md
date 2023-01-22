@@ -2,7 +2,7 @@
 Google ARound is designed and developed to help people navigate to others around them, especially when they are within several hundred feet. Users can share their device’s pose provided by Google ARCore Geospatial API. When starting navigation, Google ARound will navigate users by providing augmented reality direction guidance. Users can follow the guidance and find others. Google ARound also displays distance information and a 2D map to users, which can help them get more detailed information about their position of themselves and others. When users approach others, a red 3D anchor model will show up.
 
 Please watch the demo video to learn more about Google ARound!
-<a href="https://youtu.be/MDhNy26Co7g" title="demo video link"><img src="{image-url}" alt="demo video" /></a>
+<a href="https://youtu.be/MDhNy26Co7g" title="demo video link"><img src="images/videocover.png" alt="demo video" /></a>
 ## License
 
     Copyright 2023 Lingshuang Kong
