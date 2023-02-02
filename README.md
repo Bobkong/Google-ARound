@@ -6,6 +6,7 @@ Please watch the demo video to learn more about Google ARound!
 
 ## Test Instruction
 Log in with one of the test accounts:
+
 Username: Liz  Password: hiLiz
 
 Username: Ryan Password: hiRyan
