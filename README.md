@@ -7,9 +7,9 @@ Please watch the demo video to learn more about Google ARound!
 ## Test Instruction
 Log in with one of the test accounts:
 
-Username: Liz  Password: hiLiz
+Username 1: **Liz**  Password 1: **hiLiz**
 
-Username: Ryan Password: hiRyan
+Username 2: **Ryan** Password 2: **hiRyan**
 
 
 If you try the application by yourself, you can use the static mode, where I will create a static anchor around your location within several feet.
