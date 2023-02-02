@@ -3,6 +3,15 @@ Google ARound is designed and developed to help people navigate to others around
 
 Please watch the demo video to learn more about Google ARound!
 <a href="https://youtu.be/MDhNy26Co7g" title="demo video link"><img src="images/videocover.png" alt="demo video" /></a>
+
+## Test Instruction
+Log in with one of the test accounts:
+Username: Liz  Password: hiLiz
+Username: Ryan Password: hiRyan
+
+If you try the application by yourself, you can use the static mode, where I will create a static anchor around your location within several feet.
+If you try the application with your friend or if you have two android phones, you can try the location-sharing feature!
+
 ## License
 
     Copyright 2023 Lingshuang Kong
